@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect, type Cookies } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ cookies, fetch }) => {
@@ -7,6 +7,10 @@ export const load: LayoutServerLoad = async ({ cookies, fetch }) => {
 	const expiration = cookies.get('refresh_token_expiration');
 	const currentTime = Math.ceil(Date.now() / 1000);
 	if (!refresh_token || !expiration || Number(expiration) < currentTime) {
+		deleteCookies(cookies, 'refresh_token');
+		deleteCookies(cookies, 'refresh_token_expiration');
+		deleteCookies(cookies, 'access_token');
+		deleteCookies(cookies, 'access_token_expiration');
 		return redirect(302, '/auth');
 	}
 
@@ -59,3 +63,7 @@ export const load: LayoutServerLoad = async ({ cookies, fetch }) => {
 
 	return { chats, llmSettings };
 };
+
+function deleteCookies(cookies: Cookies, cookieName: string) {
+	cookies.delete(cookieName, { path: '/', httpOnly: true, secure: false, sameSite: 'strict' });
+}
