@@ -15,7 +15,7 @@ pub async fn get_handler(Path(id): Path<u32>) -> Result<Json<FavModel>> {
             name: llm_cfg.0.name,
             endpoint_sdk: llm_cfg.0.endpoint_sdk,
             secret_key: Some(llm_cfg.0.secret_key.unwrap()),
-            base_url: Some(llm_cfg.0.base_url.unwrap()),
+            base_url: llm_cfg.0.base_url,
             models: None,
         },
         model: llm_cfg.1,
