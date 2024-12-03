@@ -32,7 +32,7 @@ jobs:
       # Step 4: Install dependencies
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --shamefully-hoist
       # Step 5: Build
       - name: Build
         run: pnpm run build

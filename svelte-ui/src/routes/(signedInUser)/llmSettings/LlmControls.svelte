@@ -47,7 +47,7 @@
 		<div class="divider my-0"></div>
 		<form
 			method="POST"
-			action="/llmSettings/prompt?/saveFavModel"
+			action="/llmSettings/promptConfigs?/saveFavModel"
 			use:enhance={() => {
 				return async ({ update }) => {
 					await update();
