@@ -6,45 +6,58 @@
 	import IcBaselineStopCircle from '~icons/ic/baseline-stop-circle';
 	import FluentSettingsChat16Filled from '~icons/fluent/settings-chat-16-filled';
 
-	import { submitQuery, textArea } from './textArea.svelte';
-	import { esClose_SaveDb } from './[chatId]/chatResponse';
-	import { chatState } from './[chatId]/state.svelte';
+	import { saveMsgToDb } from './[chatId]/state.svelte';
 	import { llmState } from '../llmSettings/state.svelte';
+	import { useChat, type Message } from '$lib/forked-pkg/@ai-sdk_svelte/use-chat';
+	import { generateChatId } from './new';
 
-	let chatId = $derived($page.url.pathname.split('/').pop());
-	let isSendButtonDisabled = $derived(textArea.value.trim() === '');
+	const chatId = $derived($page.params.chatId);
+
+	const { input, handleSubmit, messages, isLoading, stop } = $derived(
+		useChat({
+			id: chatId,
+			body: {
+				selectedFavId: llmState.activeFav?.id
+			},
+			onFinish
+		})
+	);
+	function onFinish() {
+		const lastUserAndAssistantMsg: Message[] = $messages.slice(-2);
+		saveMsgToDb(chatId, lastUserAndAssistantMsg);
+	}
+	let isSendButtonDisabled = $derived($input.trim() === '');
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Enter' && !event.shiftKey) {
-			event.preventDefault();
-			if (textArea.value.trim() === '') {
-				return; // If the textarea is empty, don't submit
-			}
-			submitQuery(chatId);
+			event.preventDefault(); // Prevent new line
+			checkNewAndHandleSubmit(event);
 		}
 	}
-	function handleSubmit(event: any) {
-		event.preventDefault();
-		submitQuery(chatId);
-	}
-
-	function handleStopGeneratingResponse(event: any) {
-		event.preventDefault();
-		esClose_SaveDb(chatId);
+	async function checkNewAndHandleSubmit(event: KeyboardEvent | MouseEvent) {
+		const inputValue = $input;
+		if (chatId === undefined) {
+			await generateChatId(inputValue);
+		}
+		$input = inputValue;
+		handleSubmit(event); // It has event.preventDefault() inside it
 	}
 </script>
 
+{#if $messages}
+	<!-- Just to render it so that it is incrementally updated -->
+{/if}
 <div class="flex flex-col">
 	<div class="textarea textarea-bordered textarea-md rounded-badge bg-base-200">
 		<div class="flex w-full items-end gap-2 text-base">
-			<label for="upload_file_icon" class="btn btn-circle btn-ghost btn-sm text-accent">
+			<!-- <label for="upload_file_icon" class="btn btn-circle btn-ghost btn-sm text-accent">
 				<FontistoPaperclip class="h-6 w-6" />
 			</label>
-			<input type="file" id="upload_file_icon" class="hidden" />
+			<input type="file" id="upload_file_icon" class="hidden" /> -->
 			<textarea
 				name="query"
 				onkeydown={handleKeydown}
-				bind:value={textArea.value}
+				bind:value={$input}
 				style="min-height: 1lh; max-height: 8lh; field-sizing:content"
 				class="mb-[3px] w-full resize-none overflow-auto bg-transparent outline-none"
 				placeholder="Enter your query!"
@@ -52,14 +65,19 @@
 			</textarea>
 			{#if !isSendButtonDisabled}
 				<button
-					onclick={handleSubmit}
+					onclick={checkNewAndHandleSubmit}
 					class="btn btn-circle btn-accent btn-sm"
 					transition:scale={{ delay: 10, duration: 400 }}
 					><MdiArrowTopThick class="h-7 w-7" /></button
 				>
-			{:else if chatState.isResponseGenerating}
+			{:else if $isLoading}
 				<button
-					onclick={handleStopGeneratingResponse}
+					onclick={(e) => {
+						e.preventDefault();
+						stop();
+						const lastUserAndAssistantMsg: Message[] = $messages.slice(-2);
+						saveMsgToDb(chatId, lastUserAndAssistantMsg);
+					}}
 					class="btn btn-circle btn-sm"
 					transition:scale={{ delay: 10, duration: 400 }}
 					><IcBaselineStopCircle class="h-7 w-7" /></button

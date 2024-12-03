@@ -1,16 +1,18 @@
-import { redirect, type Cookies } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
+import { deleteJwtCookies } from '$lib/jwtCookies';
 
 export const load: LayoutServerLoad = async ({ cookies, fetch }) => {
 	// Log out if token expired
-	const refresh_token = cookies.get('refresh_token');
-	const expiration = cookies.get('refresh_token_expiration');
+	const authTokens: AuthTokens = {
+		refresh: {
+			token: cookies.get('refresh_token')!,
+			expiration: Number(cookies.get('refresh_token_expiration'))
+		}
+	};
 	const currentTime = Math.ceil(Date.now() / 1000);
-	if (!refresh_token || !expiration || Number(expiration) < currentTime) {
-		deleteCookies(cookies, 'refresh_token');
-		deleteCookies(cookies, 'refresh_token_expiration');
-		deleteCookies(cookies, 'access_token');
-		deleteCookies(cookies, 'access_token_expiration');
+	if (!authTokens.refresh?.token || authTokens.refresh?.expiration < currentTime) {
+		deleteJwtCookies(cookies);
 		return redirect(302, '/auth');
 	}
 
@@ -63,7 +65,3 @@ export const load: LayoutServerLoad = async ({ cookies, fetch }) => {
 
 	return { chats, llmSettings };
 };
-
-function deleteCookies(cookies: Cookies, cookieName: string) {
-	cookies.delete(cookieName, { path: '/', httpOnly: true, secure: false, sameSite: 'strict' });
-}

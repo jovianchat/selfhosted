@@ -2,8 +2,8 @@
 	import { page } from '$app/stores';
 	let { children } = $props();
 	const links = [
-		{ name: 'Prompt Engineering', href: '/llmSettings/prompt' },
-		{ name: 'API / Models', href: '/llmSettings/llm-api' }
+		{ name: 'Prompt Engineering', href: '/llmSettings/promptConfigs' },
+		{ name: 'API / Models', href: '/llmSettings/apiConfigs' }
 	];
 </script>
 

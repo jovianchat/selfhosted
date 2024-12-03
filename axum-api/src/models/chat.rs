@@ -31,8 +31,10 @@ pub struct ChatDetails {
 }
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ChatMessage {
-    pub user_query: String,
-    pub assistant_response: String,
+    pub id: String,
+    pub role: String,
+    pub content: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -54,7 +56,7 @@ impl Chat {
             None => {
                 let rows = sqlx::query_as!(
                 ChatMessage,
-                r#"SELECT user_query, assistant_response FROM ai.chat_messages WHERE chat_id = $1 ORDER BY created_at ASC"#,
+                r#"SELECT id, role, content, created_at FROM ai.chat_messages WHERE chat_id = $1"#,
                 chat_id
             )
             .fetch_all(pool)

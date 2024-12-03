@@ -21,8 +21,10 @@ declare global {
 		starred: boolean;
 	}
 	interface ChatMessage {
-		user_query: string;
-		assistant_response: string;
+		id: string;
+		role: 'user' | 'assistant';
+		content: string;
+		created_at: Date;
 	}
 	interface Chat {
 		details: ChatDetails;

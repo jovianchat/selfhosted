@@ -1,6 +1,7 @@
-import { redirect, type Cookies } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
 import type { PageServerLoad } from './$types';
+import { deleteJwtCookies, setJwtCookies } from '$lib/jwtCookies';
 
 export const load: PageServerLoad = async (event) => {
 	const refresh_token = event.cookies.get('refresh_token');
@@ -25,29 +26,15 @@ export const actions = {
 			return { error: res.statusText };
 		} else {
 			const { refresh, access }: AuthTokens = await res.json();
-			setCookies(cookies, 'refresh_token', refresh!.token);
-			setCookies(cookies, 'refresh_token_expiration', refresh!.expiration.toString());
-			setCookies(cookies, 'access_token', access!.token);
-			setCookies(cookies, 'access_token_expiration', access!.expiration.toString());
+			setJwtCookies(cookies, 'refresh_token', refresh!.token);
+			setJwtCookies(cookies, 'refresh_token_expiration', refresh!.expiration.toString());
+			setJwtCookies(cookies, 'access_token', access!.token);
+			setJwtCookies(cookies, 'access_token_expiration', access!.expiration.toString());
 			return redirect(303, '/');
 		}
 	},
 	logout: async ({ cookies }) => {
-		deleteCookies(cookies, 'refresh_token');
-		deleteCookies(cookies, 'refresh_token_expiration');
-		deleteCookies(cookies, 'access_token');
-		deleteCookies(cookies, 'access_token_expiration');
+		deleteJwtCookies(cookies);
 		return redirect(303, '/auth');
 	}
 };
-function setCookies(cookies: Cookies, cookieName: string, cookieValue: string) {
-	cookies.set(cookieName, cookieValue, {
-		path: '/',
-		httpOnly: true,
-		secure: false,
-		sameSite: 'strict'
-	});
-}
-function deleteCookies(cookies: Cookies, cookieName: string) {
-	cookies.delete(cookieName, { path: '/', httpOnly: true, secure: false, sameSite: 'strict' });
-}

@@ -1,9 +1,10 @@
 -- Create 'query_response' Table
 CREATE TABLE ai.chat_messages (
+    id TEXT NOT NULL,
     chat_id UUID NOT NULL REFERENCES ai.chats(id) ON DELETE CASCADE,
-    user_query TEXT NOT NULL,
-    assistant_response TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (chat_id, created_at)
 );
 

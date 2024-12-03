@@ -1,20 +1,21 @@
 <script lang="ts">
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { marked } from 'marked';
-	import { chatState } from './state.svelte';
 	import { tick } from 'svelte';
-	import { esClose_SaveDb } from './chatResponse';
+	import { useChat } from '$lib/forked-pkg/@ai-sdk_svelte/use-chat';
 
 	const { data } = $props();
 	const { chat } = $derived(data);
+	const { messages } = $derived(
+		useChat({
+			id: chat.details.id,
+			initialMessages: chat.messages
+		})
+	);
 
 	beforeNavigate(({ from, to, cancel }) => {
 		if (from?.url.pathname === to?.url.pathname) {
 			cancel();
-		} else {
-			const chatId = from?.url.pathname.split('/').pop();
-			esClose_SaveDb(chatId);
-			chatState.emptyQR();
 		}
 	});
 	afterNavigate(() => scrollToBottom({ instant: true }));
@@ -33,7 +34,7 @@
 					behavior: instant ? 'instant' : 'smooth'
 				});
 			});
-		}, 50);
+		}, 30);
 	};
 	// svelte:window eventListeners
 	let userScrolledUp = $state(false);
@@ -51,45 +52,32 @@
 
 	// Scroll on dependency change
 	$effect.pre(() => {
-		if (chatState.qr.length > 0) chatState.qr[chatState.qr.length - 1].assistant_response;
+		$messages;
 
 		// let scrollUp = window.scrollY + window.innerHeight < document.body.scrollHeight - 1;
-		if (chatState.qr.length > 0 && !userScrolledUp) {
+		if ($messages.length > 0 && !userScrolledUp) {
 			scrollToBottom();
 		}
-	});
-	$effect(() => {
-		chatState.qr.length;
-		scrollToBottom();
 	});
 </script>
 
 <svelte:window onscroll={handleScrollBottom} onwheel={handleWheel} />
 
 <div class="flex flex-col gap-6">
-	{#each chat.messages as { user_query, assistant_response }}
-		<div class="query_bg custom_border prose prose-sm ml-auto w-fit max-w-[92%] overflow-auto">
-			<div class="prose-cyan whitespace-pre px-4 py-2 shadow-sm">
-				{user_query}
+	{#each $messages as message}
+		{#if message.role == 'user'}
+			<div class="query_bg custom_border prose prose-sm ml-auto w-fit max-w-[92%] overflow-auto">
+				<div class="prose-cyan whitespace-pre px-4 py-2 shadow-sm">
+					{message.content}
+				</div>
 			</div>
-		</div>
-		<div class="prose min-w-full">
-			<div class="prose-cyan rounded-lg bg-base-300 px-4 py-2 shadow-md">
-				{@html marked.parse(assistant_response)}
+		{:else if message.role == 'assistant'}
+			<div class="prose min-w-full">
+				<div class="prose-cyan rounded-lg bg-base-300 px-4 py-2 shadow-md">
+					{@html marked.parse(message.content)}
+				</div>
 			</div>
-		</div>
-	{/each}
-	{#each chatState.qr as { user_query, assistant_response }}
-		<div class="query_bg custom_border prose prose-sm ml-auto w-fit max-w-[92%] overflow-auto">
-			<div class="prose-cyan whitespace-pre px-4 py-2 shadow-sm">
-				{user_query}
-			</div>
-		</div>
-		<div class="prose min-w-full">
-			<div class="prose-cyan rounded-lg bg-base-300 px-4 py-2 shadow-md">
-				{@html marked.parse(assistant_response)}
-			</div>
-		</div>
+		{/if}
 	{/each}
 </div>
 

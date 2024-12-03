@@ -1,6 +1,7 @@
 import { dev } from '$app/environment';
-import { redirect, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
+import { type HandleFetch } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { setJwtCookies } from '$lib/jwtCookies';
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	if (!dev) {
@@ -34,25 +35,9 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 
 	const proxy_url_or_vite = dev ? '' : env.REVERSE_PROXY_URL;
 	if (!authTokens.refresh?.token || authTokens.refresh?.expiration < currentTime) {
-		return redirect(302, '/auth');
-	} else if (authTokens.refresh.expiration - currentTime < expiryInTwoDays) {
-		const res = await fetch(`${proxy_url_or_vite}/axum-api/auth/new-refresh-token`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(authTokens.refresh.token)
-		});
-		if (!res.ok) {
-			throw new Error(await res.text());
-		} else {
-			const { refresh }: AuthTokens = await res.json();
-			setCookies(event, 'refresh_token', refresh!.token);
-			setCookies(event, 'refresh_token_expiration', refresh!.expiration.toString());
-			authTokens.refresh = refresh!;
-		}
+		throw new Error('Refresh token expired and failed to logout user'); // If invalid refresh token looged out at (signedInUser)/+layout.server.ts
 	}
-	//Get new access token if not exist or less than 10 mins
+	//Get new access token if not exist or less than 10 mins and refresh token is valid, need to be above refresh token renew so can get access token with old refresh token and then refresh using new access token
 	if (!authTokens.access?.token || authTokens.access.expiration - currentTime < expiryInTenMins) {
 		const res = await fetch(`${proxy_url_or_vite}/axum-api/auth/new-access-token`, {
 			method: 'POST',
@@ -65,9 +50,28 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			throw new Error(await res.text());
 		}
 		const { access }: AuthTokens = await res.json();
-		setCookies(event, 'access_token', access!.token);
-		setCookies(event, 'access_token_expiration', access!.expiration.toString());
+		setJwtCookies(event.cookies, 'access_token', access!.token);
+		setJwtCookies(event.cookies, 'access_token_expiration', access!.expiration.toString());
 		authTokens.access = access!;
+	}
+	// Renew refresh token if less than 2 days
+	if (authTokens.refresh.expiration - currentTime < expiryInTwoDays) {
+		const res = await fetch(`${proxy_url_or_vite}/axum-api/auth/new-refresh-token`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${authTokens.access.token}`
+			},
+			body: JSON.stringify(authTokens.refresh.token)
+		});
+		if (!res.ok) {
+			throw new Error(await res.text());
+		} else {
+			const { refresh }: AuthTokens = await res.json();
+			setJwtCookies(event.cookies, 'refresh_token', refresh!.token);
+			setJwtCookies(event.cookies, 'refresh_token_expiration', refresh!.expiration.toString());
+			authTokens.refresh = refresh!;
+		}
 	}
 
 	// Just to refresh tokens without calling api
@@ -78,13 +82,3 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	request.headers.set('Authorization', `Bearer ${authTokens.access.token}`);
 	return fetch(request);
 };
-
-function setCookies(event: RequestEvent, cookieName: string, cookieValue: string) {
-	event.cookies.set(cookieName, cookieValue, {
-		path: '/',
-		httpOnly: true,
-		// secure: !dev,
-		secure: false,
-		sameSite: 'strict'
-	});
-}
