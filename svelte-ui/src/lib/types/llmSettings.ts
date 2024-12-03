@@ -1,4 +1,4 @@
-import { LlmSdk } from '../../routes/(signedInUser)/llmSettings/state.svelte';
+// Import or export anything needed to make the types work globally
 
 declare global {
 	interface PromptConfig {
@@ -31,4 +31,10 @@ declare global {
 		promptConfigs: PromptConfig[];
 		favModels: FavModel[];
 	}
+}
+
+export enum LlmSdk {
+	OpenAI = 'OpenAI',
+	Anthropic = 'Anthropic',
+	OpenAICompatible = 'OpenAICompatible'
 }

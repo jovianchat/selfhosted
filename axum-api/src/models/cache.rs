@@ -27,7 +27,7 @@ impl Default for CacheState {
 pub async fn append_to_cached_chat(
     cache_state: &CacheState,
     key: &Uuid,
-    value: ChatMessage,
+    value: Vec<ChatMessage>,
     pool: &sqlx::PgPool,
 ) -> Entry<Uuid, Arc<RwLock<Chat>>> {
     let cache = cache_state.chat.clone();
@@ -37,11 +37,11 @@ pub async fn append_to_cached_chat(
             if let Some(entry) = maybe_entry {
                 // The entry exists, append the value to the Vec.
                 let v = entry.into_value();
-                v.write().unwrap().messages.push(value);
+                v.write().unwrap().messages.extend(value);
                 v
             } else {
                 let chat = Chat::fetch_chat(key, cache_state, pool).await.unwrap();
-                chat.write().unwrap().messages.push(value);
+                chat.write().unwrap().messages.extend(value);
                 chat
             }
         })

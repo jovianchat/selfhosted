@@ -19,9 +19,3 @@ class GlobalLLMState {
 }
 
 export const llmState = new GlobalLLMState();
-
-export enum LlmSdk {
-	OpenAI = 'OpenAI',
-	Anthropic = 'Anthropic',
-	OpenAICompatible = 'OpenAICompatible'
-}

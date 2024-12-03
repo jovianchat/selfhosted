@@ -1,14 +1,16 @@
 <!-- API/Models Page -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { LlmSdk, llmState } from '../state.svelte';
+	import { LlmSdk } from '$lib/types/llmSettings';
+	import { llmState } from '../state.svelte';
 
 	// const endpointSdkOptions: LlmSdk[] = ['OpenAI', 'Anthropic', 'OpenAI Compatible'];
 	let emptyConfig: ApiConfig = {
 		id: '',
 		name: '',
 		endpoint_sdk: LlmSdk.OpenAI,
-		base_url: ''
+		base_url: '',
+		models: []
 	};
 	// let apiConfigs: ApiConfig[] = $state([])
 	let editingConfig: ApiConfig = $state(emptyConfig);

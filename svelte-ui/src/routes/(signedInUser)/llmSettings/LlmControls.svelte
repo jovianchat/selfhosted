@@ -144,7 +144,7 @@
 			<!-- Save Button -->
 			<div class="modal-action items-center gap-4">
 				<p>
-					Go to <a href="/llmSettings/prompt" class="link-hover text-accent"
+					Go to <a href="/llmSettings/promptConfigs" class="link-hover text-accent"
 						>API & Prompt Settings</a
 					>
 					page to edit these options or add new!

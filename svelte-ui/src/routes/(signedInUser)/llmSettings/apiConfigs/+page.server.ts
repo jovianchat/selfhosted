@@ -1,4 +1,4 @@
-import type { LlmSdk } from '../state.svelte';
+import type { LlmSdk } from '$lib/types/llmSettings';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
@@ -10,7 +10,7 @@ export const actions: Actions = {
 			endpoint_sdk: formData.get('endpoint-sdk') as LlmSdk,
 			base_url: formData.get('base-url') as string,
 			secret_key: formData.get('api-key') as string,
-			models: formData.getAll('models') as string[]
+			models: (formData.getAll('models') as string[]).filter((model) => model.trim() !== '')
 		};
 
 		const id = formData.get('id');

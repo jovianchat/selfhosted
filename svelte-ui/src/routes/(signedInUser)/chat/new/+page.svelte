@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { submitQuery, textArea } from '../textArea.svelte';
+	import { useChat } from '$lib/forked-pkg/@ai-sdk_svelte/use-chat';
+	import { generateChatId } from '.';
+	import { llmState } from '../../llmSettings/state.svelte';
 
 	let defaultPrompts = [
 		'What is the weather like today?',
@@ -12,12 +14,16 @@
 		'What are the top movies right now?',
 		'How many planets are in the solar system?'
 	];
-	let chatId = 'new';
-	function handleSubmit(event: any, prompt: string) {
-		event.preventDefault();
-		textArea.value = prompt;
-		submitQuery(chatId);
-	}
+
+	let chatId = $state('new');
+	const { input, handleSubmit } = $derived(
+		useChat({
+			id: chatId,
+			body: {
+				selectedFavId: llmState.activeFav?.id
+			}
+		})
+	);
 </script>
 
 <div class="my-auto flex flex-col">
@@ -26,7 +32,11 @@
 		{#each defaultPrompts as prompt}
 			<button
 				class="rounded-lg bg-emerald-600 bg-opacity-70 p-3 text-white shadow transition-all hover:bg-emerald-800"
-				onclick={(e) => handleSubmit(e, prompt)}
+				onclick={async (e) => {
+					chatId = await generateChatId(prompt);
+					$input = prompt;
+					handleSubmit(e);
+				}}
 			>
 				{prompt}
 			</button>

@@ -26,85 +26,95 @@
 	let renameTextField: HTMLInputElement;
 </script>
 
-<div class="flex items-center gap-6">
-	{#if !sidebarState.isOpen}
-		<div class="tooltip tooltip-right mt-2" data-tip="Open Sidebar">
-			<button
-				class="btn btn-square btn-ghost btn-sm"
-				onclick={() => sidebarState.toggle(localStorage)}
-			>
-				<TablerLayoutSidebarLeftExpandFilled class="h-9 w-9" />
-			</button>
-		</div>
-		<a href="/" class="text-xl font-semibold">Jovian Chat</a>
-	{/if}
-</div>
-<div class="absolute left-1/2 z-10 flex -translate-x-1/2 items-center justify-center gap-2">
-	{#if chatId !== 'new' && chatId !== undefined}
-		<GridiconsChat class="h-5 w-5" />
-		{#if !isRenaming}
-			<p class="max-w-[45%] truncate">{chatState.title}</p>
-		{:else}
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					isRenaming = false;
-					actions.renameChat(chatId, chatState.title);
-				}}
-			>
-				<input
-					type="text"
-					bind:this={renameTextField}
-					bind:value={chatState.title}
-					onblur={() => (isRenaming = false)}
-					class="input input-sm input-accent w-full"
-				/>
-			</form>
+<div class="flex flex-1 justify-center">
+	<div class="flex flex-1 items-center gap-6">
+		{#if !sidebarState.isOpen}
+			<div class="tooltip tooltip-right mt-2" data-tip="Open Sidebar">
+				<button
+					class="btn btn-square btn-ghost btn-sm"
+					onclick={() => sidebarState.toggle(localStorage)}
+				>
+					<TablerLayoutSidebarLeftExpandFilled class="h-9 w-9" />
+				</button>
+			</div>
+			<a href="/" class="text-xl font-semibold">Jovian Chat</a>
 		{/if}
-	{/if}
+	</div>
+
+	<div class="content_chattextarea_width flex items-center justify-center gap-2">
+		{#if chatId !== 'new' && chatId !== undefined}
+			<GridiconsChat class="h-5 w-5" />
+			{#if !isRenaming}
+				<p class="max-w-[65%] truncate">{chatState.title}</p>
+			{:else}
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						isRenaming = false;
+						actions.renameChat(chatId, chatState.title);
+					}}
+				>
+					<input
+						type="text"
+						bind:this={renameTextField}
+						bind:value={chatState.title}
+						onblur={() => (isRenaming = false)}
+						class="input input-sm input-accent w-full"
+					/>
+				</form>
+			{/if}
+		{/if}
+	</div>
+
+	<div class="flex flex-1 justify-end gap-6">
+		{#if chatId !== 'new' && chatId !== undefined}
+			<div class="tooltip tooltip-bottom" data-tip="Rename Chat">
+				<button
+					type="button"
+					onclick={() => {
+						isRenaming = true;
+						tick().then(() => {
+							renameTextField?.focus();
+						});
+					}}
+					class="btn btn-square btn-ghost btn-sm"
+				>
+					<MdiRename class="h-6 w-6" />
+				</button>
+			</div>
+			<div class="tooltip tooltip-bottom" data-tip="Delete Chat">
+				<button
+					type="button"
+					onclick={() => {
+						actions.deleteChat(chatId);
+					}}
+					class="btn btn-square btn-ghost btn-sm"
+				>
+					<WeuiDeleteOnOutlined class="h-6 w-6" />
+				</button>
+			</div>
+			<div class="tooltip tooltip-bottom" data-tip="Star Chat">
+				<button
+					type="button"
+					onclick={() => {
+						actions.starChat(chatId);
+					}}
+					class="btn btn-square btn-ghost btn-sm"
+				>
+					{#if chatState.starred}
+						<MdiStar class="h-6 w-6 text-yellow-500" />
+					{:else}
+						<MdiStarOutline class="h-6 w-6" />
+					{/if}
+				</button>
+			</div>
+		{/if}
+		<LlmControls />
+	</div>
 </div>
-<div class="flex gap-6">
-	{#if chatId !== 'new' && chatId !== undefined}
-		<div class="tooltip tooltip-bottom" data-tip="Rename Chat">
-			<button
-				type="button"
-				onclick={() => {
-					isRenaming = true;
-					tick().then(() => {
-						renameTextField?.focus();
-					});
-				}}
-				class="btn btn-square btn-ghost btn-sm"
-			>
-				<MdiRename class="h-6 w-6" />
-			</button>
-		</div>
-		<div class="tooltip tooltip-bottom" data-tip="Delete Chat">
-			<button
-				type="button"
-				onclick={() => {
-					actions.deleteChat(chatId);
-				}}
-				class="btn btn-square btn-ghost btn-sm"
-			>
-				<WeuiDeleteOnOutlined class="h-6 w-6" />
-			</button>
-		</div>
-		<div class="tooltip tooltip-bottom" data-tip="Star Chat">
-			<button
-				type="button"
-				onclick={() => {
-					actions.starChat(chatId);
-				}}
-				class="btn btn-square btn-ghost btn-sm"
-			>
-				{#if chatState.starred}
-					<MdiStar class="h-6 w-6 text-yellow-500" />
-				{:else}
-					<MdiStarOutline class="h-6 w-6" />
-				{/if}
-			</button>
-		</div>
-	{/if}
-	<LlmControls />
-</div>
+
+<style lang="postcss">
+	.content_chattextarea_width {
+		@apply w-7/12 max-w-screen-lg;
+	}
+</style>

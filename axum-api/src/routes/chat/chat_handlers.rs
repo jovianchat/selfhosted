@@ -28,15 +28,21 @@ pub async fn get_chat(
 pub async fn append_chat(
     Path(chat_id): Path<Uuid>,
     State(state): State<AppState>,
-    Json(payload): Json<ChatMessage>,
+    Json(payload): Json<Vec<ChatMessage>>,
 ) -> Result<StatusCode> {
     let pool = &state.pg_pool;
 
     sqlx::query!(
-        r#"INSERT INTO ai.chat_messages (chat_id, user_query, assistant_response) VALUES ($1, $2, $3)"#,
+        r#"INSERT INTO ai.chat_messages (chat_id, id, role, content, created_at) VALUES ($1, $2, $3, $4, $5), ($1, $6, $7, $8, $9)"#,
         chat_id,
-        payload.user_query,
-        payload.assistant_response
+        payload[0].id,
+        payload[0].role,
+        payload[0].content,
+        payload[0].created_at,
+        payload[1].id,
+        payload[1].role,
+        payload[1].content,
+        payload[1].created_at
     )
     .execute(pool)
     .await?;
