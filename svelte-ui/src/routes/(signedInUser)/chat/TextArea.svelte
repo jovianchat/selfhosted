@@ -17,7 +17,7 @@
 		useChat({
 			id: chatId,
 			body: {
-				selectedFavId: llmState.activeFav?.id
+				selectedFavId: llmState.activeFav!.id
 			},
 			onFinish
 		})
