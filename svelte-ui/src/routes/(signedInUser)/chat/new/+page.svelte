@@ -18,10 +18,7 @@
 	let chatId = $state('new');
 	const { input, handleSubmit } = $derived(
 		useChat({
-			id: chatId,
-			body: {
-				selectedFavId: llmState.activeFav?.id
-			}
+			id: chatId
 		})
 	);
 </script>
@@ -35,7 +32,11 @@
 				onclick={async (e) => {
 					chatId = await generateChatId(prompt);
 					$input = prompt;
-					handleSubmit(e);
+					handleSubmit(e, {
+						body: {
+							selectedFavId: llmState.activeFav?.id
+						}
+					});
 				}}
 			>
 				{prompt}

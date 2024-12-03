@@ -16,9 +16,6 @@
 	const { input, handleSubmit, messages, isLoading, stop } = $derived(
 		useChat({
 			id: chatId,
-			body: {
-				selectedFavId: llmState.activeFav?.id
-			},
 			onFinish
 		})
 	);
@@ -34,13 +31,17 @@
 			checkNewAndHandleSubmit(event);
 		}
 	}
-	async function checkNewAndHandleSubmit(event: KeyboardEvent | MouseEvent) {
+	async function checkNewAndHandleSubmit(e: KeyboardEvent | MouseEvent) {
 		const inputValue = $input;
 		if (chatId === undefined) {
 			await generateChatId(inputValue);
 		}
 		$input = inputValue;
-		handleSubmit(event); // It has event.preventDefault() inside it
+		handleSubmit(e, { // It has event.preventDefault() inside it
+			body: {
+				selectedFavId: llmState.activeFav?.id
+			}
+		});
 	}
 </script>
 
