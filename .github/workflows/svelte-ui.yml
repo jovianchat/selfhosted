@@ -16,20 +16,27 @@ jobs:
     steps:
       # Step 1: Check out the code
       - uses: actions/checkout@v4
+      # Step 2: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false # disable pnpm install for using pnpm cache
       
-      # Step 2: Install Node.js and cache dependencies
+      # Step 3: Install Node.js and cache dependencies
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          cache: "npm"
-          cache-dependency-path: svelte-ui/package-lock.json
-      - run: npm ci
-      
-      # Step 3: Build
+          cache: "pnpm"
+          cache-dependency-path: svelte-ui/pnpm-lock.yaml
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+      # Step 5: Build
       - name: Build
-        run: npm run build
-
-      # Step 4: Upload build artifacts
+        run: pnpm run build
+      # Step 6: Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
