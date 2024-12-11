@@ -36,5 +36,6 @@ declare global {
 export enum LlmSdk {
 	OpenAI = 'OpenAI',
 	Anthropic = 'Anthropic',
+	GoogleGenerativeAI = 'GoogleGenerativeAI',
 	OpenAICompatible = 'OpenAICompatible'
 }

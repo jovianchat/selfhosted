@@ -37,7 +37,8 @@
 			await generateChatId(inputValue);
 		}
 		$input = inputValue;
-		handleSubmit(e, { // It has event.preventDefault() inside it
+		handleSubmit(e, {
+			// It has event.preventDefault() inside it
 			body: {
 				selectedFavId: llmState.activeFav?.id
 			}
