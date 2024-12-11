@@ -1,8 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText, type LanguageModel } from 'ai';
-import { LlmSdk } from '$lib/types/llmSettings';
-import { createAnthropic } from '@ai-sdk/anthropic';
+import { generateText } from 'ai';
+import { getModelForLLMProvider } from '../model';
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
 	try {
@@ -20,33 +18,14 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		}
 		const favModel: FavModel = await res_favModel.json();
 
-		let model: LanguageModel;
-		if (favModel.api.endpoint_sdk === LlmSdk.OpenAI) {
-			const openai = createOpenAI({
-				apiKey: favModel.api.secret_key
-			});
-			model = openai(favModel.model);
-		} else if (favModel.api.endpoint_sdk === LlmSdk.Anthropic) {
-			const anthropic = createAnthropic({
-				apiKey: favModel.api.secret_key
-			});
-			model = anthropic(favModel.model);
-		} else if (favModel.api.endpoint_sdk === LlmSdk.OpenAICompatible) {
-			const openai = createOpenAI({
-				apiKey: favModel.api.secret_key,
-				baseURL: favModel.api.base_url
-			});
-			model = openai(favModel.model);
-		} else {
-			throw new Error('Unsupported endpoint SDK');
-		}
+		const model = getModelForLLMProvider(favModel);
 
 		const { text } = await generateText({
 			model,
 			system:
 				'This query is for LLM Chat. You generate titles for these chats with strictly less than 6 words & one sentence only.',
-			maxTokens: 10,
-			temperature: 0.3,
+			maxTokens: 25,
+			temperature: 0.7,
 			prompt: input
 		});
 

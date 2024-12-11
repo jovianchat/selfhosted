@@ -19,6 +19,7 @@ pub struct PromptConfig {
 pub enum LlmSdk {
     OpenAI,
     Anthropic,
+    GoogleGenerativeAI,
     OpenAICompatible,
 }
 #[derive(Serialize, Deserialize)]
