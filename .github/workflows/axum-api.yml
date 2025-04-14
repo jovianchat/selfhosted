@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - develop # Develop branch contains both feature and bugfix commits when merged via PR
+    paths:
+      - axum-api/**
 
 defaults:
   run:
@@ -84,4 +86,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: axum_build_binary
+          # From all the files only these paths will be uploaded in directory named above
           path: axum-api/target/release/axum-api

@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - develop # Develop branch contains both feature and bugfix commits when merged via PR
+    paths:
+      - svelte-ui/**
 
 defaults:
   run:
@@ -41,6 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: svelte_build_output
+          # From all the files only these paths will be uploaded in directory named above
           path: |
             svelte-ui/build
             svelte-ui/package.json
