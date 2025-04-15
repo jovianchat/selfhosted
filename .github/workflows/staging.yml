@@ -11,7 +11,7 @@ env:
 
 jobs:
 
-  build:
+  build-image:
     runs-on: ubuntu-22.04
 
     environment: staging
