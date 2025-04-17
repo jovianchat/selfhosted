@@ -2,7 +2,7 @@
 FROM node:bookworm-slim
 
 # Install supervisor
-RUN apt update && apt install -y supervisor caddy && apt clean && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install -y supervisor && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
@@ -18,9 +18,8 @@ RUN chown -R 1000:1000 /app
 COPY ./ci/docker_entrypoint.sh /etc/app/init.sh
 RUN chmod +x /etc/app/init.sh /app/axum-api
 
-# Copy supervisord config & Caddyfile
-COPY ./ci/supervisord.conf /etc/supervisord.conf
-COPY ./ci/Caddyfile /etc/caddy/Caddyfile
+# Copy supervisord config
+COPY ./ci/my_reverse_proxy/supervisord.conf /etc/supervisord.conf
 
 ENV DATABASE_POOL_MAX_SIZE=5
 ENV JWT_SECRET="mysecretjwt"

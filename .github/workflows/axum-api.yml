@@ -5,8 +5,11 @@ on:
   push:
     branches:
       - develop # Develop branch contains both feature and bugfix commits when merged via PR
+      - bugfix/*
+      - hotfix/*
     paths:
-      - axum-api/**
+      - 'axum-api/**'
+      - '.github/workflows/axum-api.yml'
 
 defaults:
   run:
@@ -14,7 +17,7 @@ defaults:
 
 jobs:
   checks_and_setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     services:
       postgres:
@@ -62,7 +65,7 @@ jobs:
 
   build:
     needs: checks_and_setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       APP_ENVIRONMENT: "production"
       SQLX_OFFLINE: "true"
