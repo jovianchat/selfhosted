@@ -71,6 +71,36 @@ docker run -d \
   ghcr.io/jovianchat/selfhosted:latest
 ```
 
+### Option 3: Using your own reverse proxy like nginx or caddy
+Caddy example below
+
+```text
+# Caddyfile
+my-jovianchat.site {
+  reverse_proxy jovianchat:3000
+    
+    handle_path /axum-api/* {
+        reverse_proxy jovianchat:5000
+    }
+}
+```
+And add following service and caddy_data & caddy_config volume to above docker-compose for caddy setup
+```yaml
+caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - jovianchat
+```
+
 ### Access App at http://localhost:3000/ or APP_URL
 
 ## 📝 Environment Variables

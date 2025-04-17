@@ -5,6 +5,11 @@ on:
   push:
     branches:
       - develop # Develop branch contains both feature and bugfix commits when merged via PR
+      - bugfix/*
+      - hotfix/*
+    paths:
+      - 'svelte-ui/**'
+      - '.github/workflows/svelte-ui.yml'
 
 defaults:
   run:
@@ -12,7 +17,7 @@ defaults:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       # Step 1: Check out the code
       - uses: actions/checkout@v4
@@ -41,6 +46,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: svelte_build_output
+          # From all the files only these paths will be uploaded in directory named above
           path: |
             svelte-ui/build
             svelte-ui/package.json
