@@ -1,7 +1,8 @@
 <script lang="ts">
-  	import { Chat } from '@ai-sdk/svelte';
+  	import { Chat, type Message } from '@ai-sdk/svelte';
 	import { generateChatId } from '.';
 	import { llmState } from '../../llmSettings/state.svelte';
+	import { saveMsgToDb } from '../[chatId]/state.svelte';
 
 	let defaultPrompts = [
 		'What is the weather like today?',
@@ -16,7 +17,11 @@
 	];
 
 	let chatId = $state('new');
-	let chat = $derived(new Chat({ id: chatId }));
+	let chat = $derived(new Chat({ id: chatId, onFinish }));
+	function onFinish() {
+		const lastUserAndAssistantMsg: Message[] = chat.messages.slice(-2);
+		saveMsgToDb(chatId, lastUserAndAssistantMsg);
+	}
 </script>
 
 <div class="my-auto flex flex-col">
