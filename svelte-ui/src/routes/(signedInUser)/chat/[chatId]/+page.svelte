@@ -2,14 +2,14 @@
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { marked } from 'marked';
 	import { tick } from 'svelte';
-	import { useChat } from '$lib/forked-pkg/@ai-sdk_svelte/use-chat';
+	import { Chat } from '@ai-sdk/svelte';
 
 	const { data } = $props();
-	const { chat } = $derived(data);
+	const { chatDetails } = $derived(data);
 	const { messages } = $derived(
-		useChat({
-			id: chat.details.id,
-			initialMessages: chat.messages
+		new Chat({
+			id: chatDetails.id
+			// initialMessages
 		})
 	);
 
@@ -52,10 +52,10 @@
 
 	// Scroll on dependency change
 	$effect.pre(() => {
-		$messages;
+		messages;
 
 		// let scrollUp = window.scrollY + window.innerHeight < document.body.scrollHeight - 1;
-		if ($messages.length > 0 && !userScrolledUp) {
+		if (messages.length > 0 && !userScrolledUp) {
 			scrollToBottom();
 		}
 	});
@@ -63,17 +63,17 @@
 
 <svelte:window onscroll={handleScrollBottom} onwheel={handleWheel} />
 
-<div class="flex flex-col gap-6">
-	{#each $messages as message}
+<div class="flex flex-col gap-2">
+	{#each messages as message}
 		{#if message.role == 'user'}
 			<div class="query_bg custom_border prose prose-sm ml-auto w-fit max-w-[92%] overflow-auto">
-				<div class="prose-cyan whitespace-pre px-4 py-2 shadow-sm">
+				<div class="prose-cyan whitespace-pre px-3 py-2 shadow-sm">
 					{message.content}
 				</div>
 			</div>
 		{:else if message.role == 'assistant'}
 			<div class="prose min-w-full">
-				<div class="prose-cyan rounded-lg bg-base-300 px-4 py-2 shadow-md">
+				<div class="prose-cyan rounded-lg px-2 py-1">
 					{@html marked.parse(message.content)}
 				</div>
 			</div>
@@ -87,7 +87,7 @@
 		border-color: var(--fallback-bc, oklch(var(--bc) / 0.2));
 	}
 	.query_bg {
-		background-color: #30302d;
-		@apply rounded-badge;
+		@apply bg-base-300 text-base-content;
+		border-radius: 0.75rem;
 	}
 </style>

@@ -9,6 +9,7 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"fill-labs.dependi", //Dependi dependency manager
 				"formulahendry.auto-rename-tag", //Auto Rename Tag
 				"cardinal90.multi-cursor-case-preserve", //Multi Cursor Case Preserve
 				"bradlc.vscode-tailwindcss", //Tailwind
