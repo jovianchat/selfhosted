@@ -1,9 +1,19 @@
 <script lang="ts">
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
-	import { marked } from 'marked';
+	import FluentPersonChat16Filled from '~icons/fluent/person-chat-16-filled';
+	import MarkdownItAsync from 'markdown-it-async';
 	import { tick } from 'svelte';
 	import { Chat } from '@ai-sdk/svelte';
 
+	const md = MarkdownItAsync({
+		async highlight(code, lang) {
+			const { codeToHtml } = await import('shiki');
+			return await codeToHtml(code, {
+				lang,
+				theme: 'material-theme-darker'
+			});
+		}
+	});
 	const { data } = $props();
 	const { chatDetails } = $derived(data);
 	const { messages } = $derived(
@@ -63,18 +73,23 @@
 
 <svelte:window onscroll={handleScrollBottom} onwheel={handleWheel} />
 
-<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-1">
 	{#each messages as message}
 		{#if message.role == 'user'}
-			<div class="query_bg custom_border prose prose-sm ml-auto w-fit max-w-[92%] overflow-auto">
-				<div class="prose-cyan whitespace-pre px-3 py-2 shadow-sm">
-					{message.content}
+			<div class="query_bg custom_border prose prose-sm ml-auto w-fit max-w-full">
+				<div class="flex items-start gap-1 p-2">
+					<div class="prose-cyan flex-1 break-words px-1 shadow-sm">
+						{message.content}
+					</div>
+					<FluentPersonChat16Filled class="h-6 w-6 rounded-full bg-accent text-base-200" />
 				</div>
 			</div>
 		{:else if message.role == 'assistant'}
-			<div class="prose min-w-full">
-				<div class="prose-cyan rounded-lg px-2 py-1">
-					{@html marked.parse(message.content)}
+			<div class="prose min-w-full assistant">
+				<div class="prose-cyan rounded-lg px-3 py-2">
+					{#await md.renderAsync(message.content) then value}
+						{@html value}
+					{/await}
 				</div>
 			</div>
 		{/if}
@@ -89,5 +104,9 @@
 	.query_bg {
 		@apply bg-base-300 text-base-content;
 		border-radius: 0.75rem;
+	}
+	/* Dynamically inserted HTML not working without global */
+	:global(.assistant code) {
+		@apply text-accent text-opacity-80;
 	}
 </style>

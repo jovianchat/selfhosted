@@ -4,8 +4,8 @@ on:
   workflow_call:
   push:
     branches:
-      - develop # Develop branch contains both feature and bugfix commits when merged via PR
-      - bugfix/*
+      - develop # Develop branch contains both feature and bugfix commits after merged to develop
+      - bugfix/* # If this workflow needs to rerun for bugfix from release branch
       - hotfix/*
     paths:
       - 'axum-api/**'
