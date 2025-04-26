@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { useChat } from '$lib/forked-pkg/@ai-sdk_svelte/use-chat';
+  	import { Chat, type Message } from '@ai-sdk/svelte';
 	import { generateChatId } from '.';
 	import { llmState } from '../../llmSettings/state.svelte';
+	import { saveMsgToDb } from '../[chatId]/state.svelte';
 
 	let defaultPrompts = [
 		'What is the weather like today?',
@@ -16,11 +17,11 @@
 	];
 
 	let chatId = $state('new');
-	const { input, handleSubmit } = $derived(
-		useChat({
-			id: chatId
-		})
-	);
+	let chat = $derived(new Chat({ id: chatId, onFinish }));
+	function onFinish() {
+		const lastUserAndAssistantMsg: Message[] = chat.messages.slice(-2);
+		saveMsgToDb(chatId, lastUserAndAssistantMsg);
+	}
 </script>
 
 <div class="my-auto flex flex-col">
@@ -31,8 +32,8 @@
 				class="rounded-lg bg-emerald-600 bg-opacity-70 p-3 text-white shadow transition-all hover:bg-emerald-800"
 				onclick={async (e) => {
 					chatId = await generateChatId(prompt);
-					$input = prompt;
-					handleSubmit(e, {
+					chat.input = prompt;
+					chat.handleSubmit(e, {
 						body: {
 							selectedFavId: llmState.activeFav?.id
 						}

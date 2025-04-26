@@ -49,9 +49,10 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			throw new Error(await res.text());
 		}
 		const { access }: AuthTokens = await res.json();
-		setJwtCookies(event.cookies, 'access_token', access!.token);
-		setJwtCookies(event.cookies, 'access_token_expiration', access!.expiration.toString());
-		authTokens.access = access!;
+		if (!access) throw new Error('Failed to renew access token');
+		setJwtCookies(event.cookies, 'access_token', access.token);
+		setJwtCookies(event.cookies, 'access_token_expiration', access.expiration.toString());
+		authTokens.access = access;
 	}
 	// Renew refresh token if less than 2 days
 	if (authTokens.refresh.expiration - currentTime < expiryInTwoDays) {
@@ -67,9 +68,10 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			throw new Error(await res.text());
 		} else {
 			const { refresh }: AuthTokens = await res.json();
-			setJwtCookies(event.cookies, 'refresh_token', refresh!.token);
-			setJwtCookies(event.cookies, 'refresh_token_expiration', refresh!.expiration.toString());
-			authTokens.refresh = refresh!;
+			if (!refresh) throw new Error('Failed to renew refresh token');
+			setJwtCookies(event.cookies, 'refresh_token', refresh.token);
+			setJwtCookies(event.cookies, 'refresh_token_expiration', refresh.expiration.toString());
+			authTokens.refresh = refresh;
 		}
 	}
 

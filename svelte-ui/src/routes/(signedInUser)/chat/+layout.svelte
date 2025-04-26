@@ -2,8 +2,11 @@
 	import ChatTopbar from './Topbar.svelte';
 	import TextArea from './TextArea.svelte';
 	import FavModels from '$/components/FavModels.svelte';
+	import { createAIContext } from '@ai-sdk/svelte';
 
 	const { children } = $props();
+
+	createAIContext();
 </script>
 
 <div class="mx-auto flex min-h-screen flex-col justify-between px-6">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import TablerLayoutSidebarLeftExpandFilled from '~icons/tabler/layout-sidebar-left-expand-filled';
 	import GridiconsChat from '~icons/gridicons/chat';
@@ -13,9 +13,9 @@
 	import { chatState } from './[chatId]/state.svelte';
 	import LlmControls from '../llmSettings/LlmControls.svelte';
 
-	let chatId = $derived($page.params.chatId);
-	let chatTitle = $derived($page.data?.chat?.details.title);
-	let chatStarred = $derived($page.data?.chat?.details.starred);
+	let chatId = $derived(page.params.chatId);
+	let chatTitle = $derived(page.data?.chatDetails?.title);
+	let chatStarred = $derived(page.data?.chatDetails?.starred);
 	$effect(() => {
 		chatState.starred = chatStarred;
 		chatState.title = chatTitle;

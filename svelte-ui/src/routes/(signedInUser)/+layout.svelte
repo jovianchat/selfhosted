@@ -2,7 +2,7 @@
 	import Sidebar from '$/components/layout/Sidebar.svelte';
 	import { sidebarState } from '$/components/layout/sidebar.svelte';
 	import { slide } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { llmState } from './llmSettings/state.svelte';
 	import { onMount } from 'svelte';
 
@@ -16,7 +16,7 @@
 		const storedId = localStorage.getItem('activeFavId');
 		llmState.setActiveFavById(storedId ? Number(storedId) : llmState.defaultFavModels[0]);
 	});
-	let isChatPage = $derived($page.url.pathname.startsWith('/chat'));
+	let isChatPage = $derived(page.url.pathname.startsWith('/chat'));
 </script>
 
 <main>

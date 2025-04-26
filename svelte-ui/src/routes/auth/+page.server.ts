@@ -26,10 +26,11 @@ export const actions = {
 			return { error: res.statusText };
 		} else {
 			const { refresh, access }: AuthTokens = await res.json();
-			setJwtCookies(cookies, 'refresh_token', refresh!.token);
-			setJwtCookies(cookies, 'refresh_token_expiration', refresh!.expiration.toString());
-			setJwtCookies(cookies, 'access_token', access!.token);
-			setJwtCookies(cookies, 'access_token_expiration', access!.expiration.toString());
+			if (!refresh || !access) throw new Error('Failed to login');
+			setJwtCookies(cookies, 'refresh_token', refresh.token);
+			setJwtCookies(cookies, 'refresh_token_expiration', refresh.expiration.toString());
+			setJwtCookies(cookies, 'access_token', access.token);
+			setJwtCookies(cookies, 'access_token_expiration', access.expiration.toString());
 			return redirect(303, '/');
 		}
 	},
